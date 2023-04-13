@@ -87,7 +87,7 @@ func TestGetEnvironmentFlagsUseslocalEnvironmentWhenAvailable(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 
-	flags, err := client.GetEnvironmentFlags()
+	flags, err := client.GetEnvironmentFlags(context.Background())
 	assert.NoError(t, err)
 
 	allFlags := flags.AllFlags()
@@ -120,7 +120,7 @@ func TestGetEnvironmentFlagsCallsAPIWhenLocalEnvironmentNotAvailable(t *testing.
 			return flagsmith.Flag{IsDefault: true}
 		}))
 
-	flags, err := client.GetEnvironmentFlags()
+	flags, err := client.GetEnvironmentFlags(context.Background())
 
 	// Then
 	assert.NoError(t, err)
@@ -158,7 +158,7 @@ func TestGetIdentityFlagsUseslocalEnvironmentWhenAvailable(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 
-	flags, err := client.GetIdentityFlags("test_identity", nil)
+	flags, err := client.GetIdentityFlags(context.Background(), "test_identity", nil)
 
 	assert.NoError(t, err)
 
@@ -209,7 +209,7 @@ func TestGetIdentityFlagsCallsAPIWhenLocalEnvironmentNotAvailableWithTraits(t *t
 	traits := []*flagsmith.Trait{&stringTrait, &intTrait, &floatTrait, &boolTrait, &nillTrait}
 	// When
 
-	flags, err := client.GetIdentityFlags("test_identity", traits)
+	flags, err := client.GetIdentityFlags(context.Background(), "test_identity", traits)
 
 	// Then
 	assert.NoError(t, err)
@@ -244,7 +244,7 @@ func TestDefaultHandlerIsUsedWhenNoMatchingEnvironmentFlagReturned(t *testing.T)
 			return flagsmith.Flag{IsDefault: true}
 		}))
 
-	flags, err := client.GetEnvironmentFlags()
+	flags, err := client.GetEnvironmentFlags(context.Background())
 
 	// Then
 	assert.NoError(t, err)
@@ -276,7 +276,7 @@ func TestDefaultHandlerIsUsedWhenTimeout(t *testing.T) {
 			return flagsmith.Flag{IsDefault: true}
 		}))
 
-	flags, err := client.GetEnvironmentFlags()
+	flags, err := client.GetEnvironmentFlags(context.Background())
 
 	// Then
 	assert.NoError(t, err)
@@ -297,7 +297,7 @@ func TestDefaultHandlerIsUsedWhenRequestFails(t *testing.T) {
 			return flagsmith.Flag{IsDefault: true}
 		}))
 
-	flags, err := client.GetEnvironmentFlags()
+	flags, err := client.GetEnvironmentFlags(context.Background())
 
 	// Then
 	assert.NoError(t, err)
@@ -315,7 +315,7 @@ func TestFlagsmithAPIErrorIsReturnedIfRequestFailsWithoutDefaultHandler(t *testi
 	// When
 	client := flagsmith.NewClient(fixtures.EnvironmentAPIKey, flagsmith.WithBaseURL(server.URL+"/api/v1/"))
 
-	_, err := client.GetEnvironmentFlags()
+	_, err := client.GetEnvironmentFlags(context.Background())
 	assert.Error(t, err)
 	_, ok := err.(*flagsmith.FlagsmithAPIError)
 	assert.True(t, ok)
@@ -463,7 +463,7 @@ func TestWithProxyClientOption(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 
-	flags, err := client.GetEnvironmentFlags()
+	flags, err := client.GetEnvironmentFlags(context.Background())
 	assert.NoError(t, err)
 
 	allFlags := flags.AllFlags()

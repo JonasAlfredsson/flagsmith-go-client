@@ -63,21 +63,21 @@ func NewClient(apiKey string, options ...Option) *Client {
 }
 
 // Returns `Flags` struct holding all the flags for the current environment.
-func (c *Client) GetEnvironmentFlags() (Flags, error) {
+func (c *Client) GetEnvironmentFlags(ctx context.Context) (Flags, error) {
 	if env, ok := c.environment.Load().(*environments.EnvironmentModel); ok {
-		return c.GetEnvironmentFlagsFromDocument(c.ctx, env)
+		return c.GetEnvironmentFlagsFromDocument(env)
 	}
-	return c.GetEnvironmentFlagsFromAPI(c.ctx)
+	return c.GetEnvironmentFlagsFromAPI(ctx)
 }
 
 // Returns `Flags` struct holding all the flags for the current environment for a given identity. Will also
 // upsert all traits to the Flagsmith API for future evaluations. Providing a
 // trait with a value of nil will remove the trait from the identity if it exists.
-func (c *Client) GetIdentityFlags(identifier string, traits []*Trait) (Flags, error) {
+func (c *Client) GetIdentityFlags(ctx context.Context, identifier string, traits []*Trait) (Flags, error) {
 	if env, ok := c.environment.Load().(*environments.EnvironmentModel); ok {
-		return c.GetIdentityFlagsFromDocument(c.ctx, env, identifier, traits)
+		return c.GetIdentityFlagsFromDocument(env, identifier, traits)
 	}
-	return c.GetIdentityFlagsFromAPI(c.ctx, identifier, traits)
+	return c.GetIdentityFlagsFromAPI(ctx, identifier, traits)
 }
 
 // Returns an array of segments that the given identity is part of.
@@ -145,7 +145,7 @@ func (c *Client) GetIdentityFlagsFromAPI(ctx context.Context, identifier string,
 	return makeFlagsfromIdentityAPIJson(resp.Body(), c.analyticsProcessor, c.defaultFlagHandler)
 }
 
-func (c *Client) GetIdentityFlagsFromDocument(ctx context.Context, env *environments.EnvironmentModel, identifier string, traits []*Trait) (Flags, error) {
+func (c *Client) GetIdentityFlagsFromDocument(env *environments.EnvironmentModel, identifier string, traits []*Trait) (Flags, error) {
 	identity := buildIdentityModel(identifier, env.APIKey, traits)
 	featureStates := flagengine.GetIdentityFeatureStates(env, &identity)
 	flags := makeFlagsFromFeatureStates(
@@ -157,7 +157,7 @@ func (c *Client) GetIdentityFlagsFromDocument(ctx context.Context, env *environm
 	return flags, nil
 }
 
-func (c *Client) GetEnvironmentFlagsFromDocument(ctx context.Context, env *environments.EnvironmentModel) (Flags, error) {
+func (c *Client) GetEnvironmentFlagsFromDocument(env *environments.EnvironmentModel) (Flags, error) {
 	return makeFlagsFromFeatureStates(
 		env.FeatureStates,
 		c.analyticsProcessor,

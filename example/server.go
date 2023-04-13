@@ -57,7 +57,7 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 			traits = []*flagsmith.Trait{&trait}
 		}
 
-		flags, _ := client.GetIdentityFlags(identifier, traits)
+		flags, _ := client.GetIdentityFlags(ctx, identifier, traits)
 
 		showButton, _ := flags.IsFeatureEnabled("secret_button")
 		buttonData, _ := flags.GetFeatureValue("secret_button")
@@ -76,7 +76,7 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 		_ = t.Execute(w, templateData)
 		return
 	}
-	flags, _ := client.GetEnvironmentFlags()
+	flags, _ := client.GetEnvironmentFlags(ctx)
 
 	showButton, _ := flags.IsFeatureEnabled("secret_button")
 
