@@ -64,9 +64,11 @@ func NewClient(apiKey string, options ...Option) *Client {
 
 // Returns `Flags` struct holding all the flags for the current environment.
 func (c *Client) GetEnvironmentFlags() (Flags, error) {
+	// The environment has not been updated yet since the DNS does not work.
 	if env, ok := c.environment.Load().(*environments.EnvironmentModel); ok {
 		return c.GetEnvironmentFlagsFromDocument(c.ctx, env)
 	}
+	// We will then try to fetch from the API.
 	return c.GetEnvironmentFlagsFromAPI(c.ctx)
 }
 
@@ -115,10 +117,12 @@ func (c *Client) BulkIdentify(batch []*IdentityTraits) error {
 
 func (c *Client) GetEnvironmentFlagsFromAPI(ctx context.Context) (Flags, error) {
 	resp, err := c.client.NewRequest().
-		SetContext(ctx).
+		SetContext(ctx). // This context is c.context = background.Context() -> will not expire
 		Get(c.config.baseURL + "flags/")
-
+	// This call will now block any further execution of the program for 30 seconds before continuing.
 	if err != nil || !resp.IsSuccess() {
+		// We have a default handler set, but we have no good way of propagating back if the
+		// requested feature has a default case.
 		if c.defaultFlagHandler != nil {
 			return Flags{defaultFlagHandler: c.defaultFlagHandler}, nil
 		}
